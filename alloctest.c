@@ -110,11 +110,13 @@ main (int argc,
    gdouble total_time;
    gint iter = 1000000;
    gint size = 128;
+   gint nthread = 1;
    gchar *command = NULL;
    GOptionEntry entries [] = {
       { "iterations", 'i', 0, G_OPTION_ARG_INT, &iter, "The number of iterations to perform.", "1000000" },
       { "size", 's', 0, G_OPTION_ARG_INT, &size, "The size of allocation to perform in bytes.", "128" },
       { "command", 'c', 0, G_OPTION_ARG_STRING, &command, "The command to run. Use 'list' to list available commands.", "NAME" },
+      { "thread", 't', 0, G_OPTION_ARG_INT, &nthread, "The number of threads to run.", "1" },
       { NULL }
    };
    GOptionContext *context;
@@ -168,8 +170,8 @@ main (int argc,
    total_usec = (end - begin) % G_USEC_PER_SEC;
    total_time = (gdouble)total_sec + (gdouble)total_usec / G_USEC_PER_SEC;
 
-   fprintf (stdout, "%s %u %u %lf\n",
-            command, iter, size, total_time);
+   fprintf (stdout, "%s %u %u %u %lf\n",
+            command, iter, size, nthread, total_time);
 
    return EXIT_SUCCESS;
 }
