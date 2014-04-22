@@ -32,6 +32,33 @@ struct _AllocTest
    AllocTestFunc test_func;
 };
 
+static void *(*my_malloc) (size_t);
+static void (*my_free) (void *);
+
+static void
+make_tcmalloc_resident (void)
+{
+   void *lib;
+
+   lib = dlopen ("/usr/lib64/libtcmalloc_minimal.so.4", RTLD_NOW|RTLD_GLOBAL);
+   if (!lib) {
+      fprintf (stderr, "Failed to load libtcmalloc_minimal.so.4\n");
+      exit (EXIT_FAILURE);
+   }
+
+   my_malloc = dlsym (lib, "malloc");
+   if (!my_malloc) {
+      fprintf (stderr, "Failed to locate malloc() within libtcmalloc_minimal.so.4\n");
+      exit (EXIT_FAILURE);
+   }
+
+   my_free = dlsym (lib, "free");
+   if (!my_free) {
+      fprintf (stderr, "Failed to locate free() within libtcmalloc_minimal.so.4\n");
+      exit (EXIT_FAILURE);
+   }
+}
+
 static void
 alloc_test_impl_gslice (const AllocTest *test)
 {
@@ -43,6 +70,13 @@ alloc_test_impl_gslice (const AllocTest *test)
       g_assert (ptr);
       g_slice_free1 (test->size, ptr);
    }
+}
+
+static void
+alloc_test_impl_gslice_tcmalloc (const AllocTest *test)
+{
+   make_tcmalloc_resident ();
+   alloc_test_impl_gslice (test);
 }
 
 static void
@@ -75,28 +109,9 @@ static void
 alloc_test_impl_tcmalloc (const AllocTest *test)
 {
    unsigned i;
-   void *(*my_malloc) (size_t);
-   void (*my_free) (void *);
-   void *lib;
    void *ptr;
 
-   lib = dlopen ("/usr/lib64/libtcmalloc_minimal.so.4", RTLD_LOCAL|RTLD_LAZY);
-   if (!lib) {
-      fprintf (stderr, "Failed to load libtcmalloc_minimal.so.4\n");
-      exit (EXIT_FAILURE);
-   }
-
-   my_malloc = dlsym (lib, "malloc");
-   if (!my_malloc) {
-      fprintf (stderr, "Failed to locate malloc() within libtcmalloc_minimal.so.4\n");
-      exit (EXIT_FAILURE);
-   }
-
-   my_free = dlsym (lib, "free");
-   if (!my_free) {
-      fprintf (stderr, "Failed to locate free() within libtcmalloc_minimal.so.4\n");
-      exit (EXIT_FAILURE);
-   }
+   make_tcmalloc_resident ();
 
    for (i = 0; i < test->n_iterations; i++) {
       ptr = my_malloc (test->size);
@@ -180,6 +195,8 @@ main (int argc,
       test.test_func = alloc_test_impl_malloc;
    } else if (0 == g_strcmp0 (command, "gslice")) {
       test.test_func = alloc_test_impl_gslice;
+   } else if (0 == g_strcmp0 (command, "gslice+tcmalloc")) {
+      test.test_func = alloc_test_impl_gslice_tcmalloc;
    } else if (0 == g_strcmp0 (command, "gobject")) {
       test.test_func = alloc_test_impl_gobject;
    } else if (0 == g_strcmp0 (command, "gmalloc")) {
