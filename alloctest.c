@@ -212,8 +212,9 @@ main (int argc,
    total_usec = (end - begin) % G_USEC_PER_SEC;
    total_time = (gdouble)total_sec + (gdouble)total_usec / G_USEC_PER_SEC;
 
-   fprintf (stdout, "%s %u %u %u %lf\n",
-            command, iter, size, nthread, total_time);
+   fprintf (stdout, "%s%s %u %u %u %lf\n",
+            command, getenv ("LD_PRELOAD") ? "+tcmalloc" : "",
+            iter, size, nthread, total_time);
 
    pthread_mutex_destroy (&test.mutex);
    pthread_cond_destroy (&test.cond);
