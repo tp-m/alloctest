@@ -19,6 +19,7 @@
 #include <dlfcn.h>
 #include <glib.h>
 #include <glib-object.h>
+#include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -32,7 +33,10 @@ struct _AllocTest
 {
    unsigned n_iterations;
    unsigned size;
+   unsigned active;
    AllocTestFunc test_func;
+   pthread_mutex_t mutex;
+   pthread_cond_t cond;
 };
 
 static void
@@ -87,6 +91,21 @@ alloc_test_impl_gmalloc (const AllocTest *test)
    }
 }
 
+static void *
+worker (void *data)
+{
+   AllocTest *test = data;
+
+   pthread_mutex_lock (&test->mutex);
+   test->active++;
+   pthread_cond_wait (&test->cond, &test->mutex);
+   pthread_mutex_unlock (&test->mutex);
+
+   test->test_func (test);
+
+   return NULL;
+}
+
 static void
 usage (FILE *stream)
 {
@@ -121,6 +140,8 @@ main (int argc,
    };
    GOptionContext *context;
    GError *error = NULL;
+   pthread_t *threads;
+   int i;
 
    context = g_option_context_new ("- malloc performance tests.");
    g_option_context_add_main_entries (context, entries, NULL);
@@ -162,8 +183,29 @@ main (int argc,
       return EXIT_FAILURE;
    }
 
+   pthread_mutex_init (&test.mutex, NULL);
+   pthread_cond_init (&test.cond, NULL);
+
+   threads = calloc (nthread, sizeof (pthread_t));
+
+   for (i = 0; i < nthread; i++) {
+      pthread_create (&threads [i], NULL, worker, &test);
+   }
+
+   for (;;) {
+      pthread_mutex_lock (&test.mutex);
+      if (test.active == nthread) {
+         break;
+      }
+      pthread_mutex_unlock (&test.mutex);
+   }
+
    begin = g_get_monotonic_time ();
-   test.test_func (&test);
+   pthread_cond_broadcast (&test.cond);
+   pthread_mutex_unlock (&test.mutex);
+   for (i = 0; i < nthread; i++) {
+      pthread_join (threads [i], NULL);
+   }
    end = g_get_monotonic_time ();
 
    total_sec = (end - begin) / G_USEC_PER_SEC;
@@ -172,6 +214,9 @@ main (int argc,
 
    fprintf (stdout, "%s %u %u %u %lf\n",
             command, iter, size, nthread, total_time);
+
+   pthread_mutex_destroy (&test.mutex);
+   pthread_cond_destroy (&test.cond);
 
    return EXIT_SUCCESS;
 }

@@ -5,7 +5,7 @@ WARNINGS = -Wall
 DEBUG = -ggdb
 OPTIMIZE = -O2
 CFLAGS = $(shell pkg-config --cflags $(PKGS))
-LIBS = $(shell pkg-config --libs $(PKGS)) -ldl
+LIBS = $(shell pkg-config --libs $(PKGS)) -ldl -lpthread
 
 alloctest: alloctest.c
 	$(CC) -o $@ $(WARNINGS) $(DEBUG) $(OPTIMIZE) $(CFLAGS) $(LIBS) $^
