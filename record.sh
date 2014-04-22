@@ -27,26 +27,62 @@ fi
 capture_name=$1
 
 COMMANDS="malloc gmalloc gslice gobject"
-N_THREADS="1 2 4 5 10 25 50 75 100"
-SIZE="32 128 256 512 1024 2048"
+N_THREADS="1 2 4 5 10 25"
+SIZE="256"
 
-mkdir -p samples
-fname="samples/${capture_name}.txt"
-rm -f ${fname}
-touch ${fname}
+mkdir -p samples/${capture_name}
 
 for cmd in $COMMANDS; do
+    filename="samples/${capture_name}/${cmd}.txt"
+    rm -f ${filename}
+    touch ${filename}
     for nthread in $N_THREADS; do
         for sz in $SIZE; do
-            ./alloctest -c $cmd -s $sz -t $nthread -i 100000 | tee -a ${fname}
+            ./alloctest -c $cmd -s $sz -t $nthread -i 100000 | tee -a ${filename}
         done
     done
 done
 
 for cmd in $COMMANDS; do
+    filename="samples/${capture_name}/${cmd}-tcmalloc.txt"
+    rm -f ${filename}
+    touch ${filename}
     for nthread in $N_THREADS; do
         for sz in $SIZE; do
-            LD_PRELOAD=/usr/lib64/libtcmalloc_minimal.so.4 ./alloctest -c $cmd -s $sz -t $nthread -i 100000 | tee -a ${fname}
+            LD_PRELOAD=/usr/lib64/libtcmalloc_minimal.so.4 \
+                ./alloctest -c $cmd -s $sz -t $nthread -i 100000 | tee -a ${filename}
         done
     done
 done
+
+for cmd in $COMMANDS; do
+    gnuplot <<EOF
+set term png size 1024,768
+set out "samples/${capture_name}/${cmd}.png"
+set title "${cmd} vs ${cmd}-tcmalloc"
+set xlabel 'Thread Count'
+set ylabel 'Alloc Cycles per Second'
+set style line 1 lw 4 lc rgb '#990042' ps 2 pt 6 pi 5
+set style line 2 lw 3 lc rgb '#31f120' ps 2 pt 12 pi 3
+plot [0:25] \
+    'samples/${capture_name}/${cmd}.txt' using 4:5 with linespoints title '${cmd}', \
+    'samples/${capture_name}/${cmd}-tcmalloc.txt' using 4:5 with linespoints title '${cmd}+tcmalloc'
+
+EOF
+done
+
+
+gnuplot <<EOF
+set term png size 1024,768
+set out "samples/${capture_name}/gslice-vs-gmalloc.png"
+set title "gslice vs gmalloc"
+set xlabel 'Thread Count'
+set ylabel 'Alloc Cycles per Second'
+set style line 1 lw 4 lc rgb '#990042' ps 2 pt 6 pi 5
+set style line 2 lw 3 lc rgb '#31f120' ps 2 pt 12 pi 3
+plot [0:25] \
+    'samples/${capture_name}/gslice.txt' using 4:5 with linespoints title 'gslice', \
+    'samples/${capture_name}/gmalloc.txt' using 4:5 with linespoints title 'gmalloc', \
+    'samples/${capture_name}/gmalloc-tcmalloc.txt' using 4:5 with linespoints title 'gmalloc+tcmalloc'
+
+EOF

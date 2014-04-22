@@ -1,0 +1,6 @@
+malloc+tcmalloc 100000 256 1 0.001752
+malloc+tcmalloc 100000 256 2 0.002877
+malloc+tcmalloc 100000 256 4 0.004522
+malloc+tcmalloc 100000 256 5 0.004944
+malloc+tcmalloc 100000 256 10 0.008809
+malloc+tcmalloc 100000 256 25 0.021820
