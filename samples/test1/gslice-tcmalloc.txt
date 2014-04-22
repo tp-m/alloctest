@@ -1,8 +1,8 @@
-gslice+tcmalloc 100000 256 1 0.007179
-gslice+tcmalloc 100000 256 2 0.008173
-gslice+tcmalloc 100000 256 4 0.011880
-gslice+tcmalloc 100000 256 5 0.017530
-gslice+tcmalloc 100000 256 10 0.029201
-gslice+tcmalloc 100000 256 15 0.041582
-gslice+tcmalloc 100000 256 20 0.048762
-gslice+tcmalloc 100000 256 25 0.061129
+gslice+tcmalloc 100000 256 1 0.007445
+gslice+tcmalloc 100000 256 2 0.007794
+gslice+tcmalloc 100000 256 4 0.011052
+gslice+tcmalloc 100000 256 5 0.016288
+gslice+tcmalloc 100000 256 10 0.029000
+gslice+tcmalloc 100000 256 15 0.038448
+gslice+tcmalloc 100000 256 20 0.049633
+gslice+tcmalloc 100000 256 25 0.058082

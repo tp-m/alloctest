@@ -1,8 +1,8 @@
-malloc+tcmalloc 100000 256 1 0.001542
-malloc+tcmalloc 100000 256 2 0.001683
-malloc+tcmalloc 100000 256 4 0.004405
-malloc+tcmalloc 100000 256 5 0.004803
-malloc+tcmalloc 100000 256 10 0.008841
-malloc+tcmalloc 100000 256 15 0.011901
-malloc+tcmalloc 100000 256 20 0.017832
-malloc+tcmalloc 100000 256 25 0.029713
+malloc+tcmalloc 100000 256 1 0.001567
+malloc+tcmalloc 100000 256 2 0.003020
+malloc+tcmalloc 100000 256 4 0.003176
+malloc+tcmalloc 100000 256 5 0.004681
+malloc+tcmalloc 100000 256 10 0.007877
+malloc+tcmalloc 100000 256 15 0.012023
+malloc+tcmalloc 100000 256 20 0.015665
+malloc+tcmalloc 100000 256 25 0.020351
