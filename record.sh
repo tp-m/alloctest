@@ -61,7 +61,7 @@ set term png size 1024,768
 set out "samples/${capture_name}/${cmd}.png"
 set title "${cmd} vs ${cmd}-tcmalloc"
 set xlabel 'Thread Count'
-set ylabel 'Alloc Cycles per Second (${SIZE} bytes)'
+set ylabel 'Time in Seconds'
 set style line 1 lw 4 lc rgb '#990042' ps 2 pt 6 pi 5
 set style line 2 lw 3 lc rgb '#31f120' ps 2 pt 12 pi 3
 plot [0:25] \
@@ -75,9 +75,9 @@ done
 gnuplot <<EOF
 set term png size 1024,768
 set out "samples/${capture_name}/gslice-vs-gmalloc.png"
-set title "gslice vs gmalloc"
+set title "gslice vs gmalloc - 100000 iterations"
 set xlabel 'Thread Count'
-set ylabel 'Alloc Cycles per Second (${SIZE} bytes)'
+set ylabel 'Time in Seconds'
 set style line 1 lw 4 lc rgb '#990042' ps 2 pt 6 pi 5
 set style line 2 lw 3 lc rgb '#31f120' ps 2 pt 12 pi 3
 plot [0:25] \
@@ -91,9 +91,9 @@ EOF
 gnuplot <<EOF
 set term png size 1024,768
 set out "samples/${capture_name}/gslice-vs-gobject.png"
-set title "gslice vs g_object_new"
+set title "gslice vs g_object_new - 100000 iterations"
 set xlabel 'Thread Count'
-set ylabel 'Alloc Cycles per Second'
+set ylabel 'Time in Seconds'
 set style line 1 lw 4 lc rgb '#990042' ps 2 pt 6 pi 5
 set style line 2 lw 3 lc rgb '#31f120' ps 2 pt 12 pi 3
 plot [0:25] \
