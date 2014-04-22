@@ -82,6 +82,7 @@ set style line 1 lw 4 lc rgb '#990042' ps 2 pt 6 pi 5
 set style line 2 lw 3 lc rgb '#31f120' ps 2 pt 12 pi 3
 plot [0:25] \
     'samples/${capture_name}/gslice.txt' using 4:5 with linespoints title 'gslice', \
+    'samples/${capture_name}/malloc.txt' using 4:5 with linespoints title 'malloc (glibc)', \
     'samples/${capture_name}/gmalloc.txt' using 4:5 with linespoints title 'gmalloc', \
     'samples/${capture_name}/gmalloc-tcmalloc.txt' using 4:5 with linespoints title 'gmalloc+tcmalloc'
 

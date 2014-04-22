@@ -1,8 +1,8 @@
-gobject+tcmalloc 100000 256 1 0.078813
-gobject+tcmalloc 100000 256 2 0.096277
-gobject+tcmalloc 100000 256 4 0.128777
-gobject+tcmalloc 100000 256 5 0.162453
-gobject+tcmalloc 100000 256 10 0.312928
-gobject+tcmalloc 100000 256 15 0.458742
-gobject+tcmalloc 100000 256 20 0.623793
-gobject+tcmalloc 100000 256 25 0.773664
+gobject+tcmalloc 100000 256 1 0.077732
+gobject+tcmalloc 100000 256 2 0.095509
+gobject+tcmalloc 100000 256 4 0.128706
+gobject+tcmalloc 100000 256 5 0.156582
+gobject+tcmalloc 100000 256 10 0.310047
+gobject+tcmalloc 100000 256 15 0.467823
+gobject+tcmalloc 100000 256 20 0.613264
+gobject+tcmalloc 100000 256 25 0.785431
