@@ -27,7 +27,7 @@ fi
 capture_name=$1
 
 COMMANDS="malloc gmalloc gslice gobject"
-N_THREADS="1 2 4 5 10 25"
+N_THREADS="1 2 4 5 10 15 20 25"
 SIZE="256"
 
 mkdir -p samples/${capture_name}
