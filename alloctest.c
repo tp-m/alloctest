@@ -110,6 +110,7 @@ worker (void *data)
 static gsize
 get_vmpeak (void)
 {
+#ifdef __linux__
    gchar *contents = NULL;
    gchar *filename;
    gchar *buf;
@@ -132,6 +133,9 @@ get_vmpeak (void)
    g_free (filename);
 
    return ret;
+#else
+   return 0;
+#endif
 }
 
 static void
