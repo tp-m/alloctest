@@ -107,6 +107,33 @@ worker (void *data)
    return NULL;
 }
 
+static gsize
+get_vmpeak (void)
+{
+   gchar *contents = NULL;
+   gchar *filename;
+   gchar *buf;
+   gsize len = 0;
+   gsize ret = 0;
+
+   filename = g_strdup_printf ("/proc/%u/status", (unsigned)getpid ());
+
+   if (g_file_get_contents (filename, &contents, &len, NULL)) {
+      buf = strstr (contents, "VmPeak:");
+      if (buf) {
+         buf += strlen ("VmPeak:");
+         while (*buf == ' ')
+            buf++;
+         ret = g_ascii_strtoll (buf, NULL, 10);
+      }
+      g_free (contents);
+   }
+
+   g_free (filename);
+
+   return ret;
+}
+
 static void
 usage (FILE *stream)
 {
@@ -124,6 +151,7 @@ main (int argc,
 {
    struct mallinfo minfo;
    AllocTest test = { 0 };
+   gsize vmpeak = 0;
    gint64 begin;
    gint64 end;
    gint64 total_usec;
@@ -215,10 +243,12 @@ main (int argc,
    total_time = (gdouble)total_sec + (gdouble)total_usec / G_USEC_PER_SEC;
 
    minfo = mallinfo ();
+   vmpeak = get_vmpeak ();
 
-   fprintf (stdout, "%s%s %u %u %u %lf %u\n",
+   fprintf (stdout, "%s%s %u %u %u %lf %u %"G_GSIZE_FORMAT"\n",
             command, getenv ("LD_PRELOAD") ? "+tcmalloc" : "",
-            iter, size, nthread, total_time, minfo.uordblks);
+            iter, size, nthread, total_time, minfo.uordblks,
+            vmpeak);
 
    pthread_mutex_destroy (&test.mutex);
    pthread_cond_destroy (&test.cond);
