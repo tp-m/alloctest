@@ -43,53 +43,77 @@ struct _AllocTest
 static void
 alloc_test_impl_gslice (const AllocTest *test)
 {
+   gpointer *data;
    unsigned i;
-   void *ptr;
+
+   data = g_malloc_n (sizeof *data, test->n_iterations);
 
    for (i = 0; i < test->n_iterations; i++) {
-      ptr = g_slice_alloc (test->size);
-      g_assert (ptr);
-      g_slice_free1 (test->size, ptr);
+      data [i] = g_slice_alloc (test->size);
    }
+
+   for (i = 0; i < test->n_iterations; i++) {
+      g_slice_free1 (test->size, data [i]);
+   }
+
+   g_free (data);
 }
 
 static void
 alloc_test_impl_gobject (const AllocTest *test)
 {
+   gpointer *data;
    unsigned i;
-   void *ptr;
+
+   data = g_malloc_n (sizeof *data, test->n_iterations);
 
    for (i = 0; i < test->n_iterations; i++) {
-      ptr = g_object_new (G_TYPE_OBJECT, NULL);
-      g_assert (ptr);
-      g_object_unref (ptr);
+      data [i] = g_object_new (G_TYPE_OBJECT, NULL);
    }
+
+   for (i = 0; i < test->n_iterations; i++) {
+      g_object_unref (data [i]);
+   }
+
+   g_free (data);
 }
 
 static void
 alloc_test_impl_malloc (const AllocTest *test)
 {
+   gpointer *data;
    unsigned i;
-   void *ptr;
+
+   data = g_malloc_n (sizeof *data, test->n_iterations);
 
    for (i = 0; i < test->n_iterations; i++) {
-      ptr = malloc (test->size);
-      g_assert (ptr);
-      free (ptr);
+      data [i] = malloc (test->size);
    }
+
+   for (i = 0; i < test->n_iterations; i++) {
+      free (data [i]);
+   }
+
+   g_free (data);
 }
 
 static void
 alloc_test_impl_gmalloc (const AllocTest *test)
 {
+   gpointer *data;
    unsigned i;
-   void *ptr;
+
+   data = g_malloc_n (sizeof *data, test->n_iterations);
 
    for (i = 0; i < test->n_iterations; i++) {
-      ptr = g_malloc (test->size);
-      g_assert (ptr);
-      g_free (ptr);
+      data [i] = g_malloc (test->size);
    }
+
+   for (i = 0; i < test->n_iterations; i++) {
+      free (data [i]);
+   }
+
+   g_free (data);
 }
 
 static void *
