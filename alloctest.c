@@ -19,6 +19,7 @@
 #include <dlfcn.h>
 #include <glib.h>
 #include <glib-object.h>
+#include <malloc.h>
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -121,6 +122,7 @@ int
 main (int argc,
       char *argv[])
 {
+   struct mallinfo minfo;
    AllocTest test = { 0 };
    gint64 begin;
    gint64 end;
@@ -212,9 +214,11 @@ main (int argc,
    total_usec = (end - begin) % G_USEC_PER_SEC;
    total_time = (gdouble)total_sec + (gdouble)total_usec / G_USEC_PER_SEC;
 
-   fprintf (stdout, "%s%s %u %u %u %lf\n",
+   minfo = mallinfo ();
+
+   fprintf (stdout, "%s%s %u %u %u %lf %u\n",
             command, getenv ("LD_PRELOAD") ? "+tcmalloc" : "",
-            iter, size, nthread, total_time);
+            iter, size, nthread, total_time, minfo.uordblks);
 
    pthread_mutex_destroy (&test.mutex);
    pthread_cond_destroy (&test.cond);
