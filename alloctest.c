@@ -50,6 +50,7 @@ alloc_test_impl_gslice (const AllocTest *test)
 
    for (i = 0; i < test->n_iterations; i++) {
       data [i] = g_slice_alloc (test->size);
+      memset (data [i], 0, 4);
    }
 
    for (i = 0; i < test->n_iterations; i++) {
@@ -88,6 +89,7 @@ alloc_test_impl_malloc (const AllocTest *test)
 
    for (i = 0; i < test->n_iterations; i++) {
       data [i] = malloc (test->size);
+      memset (data [i], 0, 4);
    }
 
    for (i = 0; i < test->n_iterations; i++) {
@@ -107,6 +109,7 @@ alloc_test_impl_gmalloc (const AllocTest *test)
 
    for (i = 0; i < test->n_iterations; i++) {
       data [i] = g_malloc (test->size);
+      memset (data [i], 0, 4);
    }
 
    for (i = 0; i < test->n_iterations; i++) {
@@ -150,6 +153,11 @@ get_vmpeak (void)
          while (*buf == ' ')
             buf++;
          ret = g_ascii_strtoll (buf, NULL, 10);
+         if (strstr (buf, "kB")) {
+            ret *= 1024;
+         } else if (strstr (buf, "mB")) {
+            ret *= 1024 * 1024;
+         }
       }
       g_free (contents);
    }
