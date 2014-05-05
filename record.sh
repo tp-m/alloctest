@@ -101,3 +101,22 @@ plot [0:25] \
     'samples/${capture_name}/gobject.txt' using 4:5 with linespoints title 'g_object_new'
 
 EOF
+
+
+gnuplot <<EOF
+set term png size 1024,768
+set out "samples/${capture_name}/total_memory.png"
+set title "vm peak memory - 100000 256b allocations"
+set xlabel 'Thread Count'
+set ylabel 'Size in Bytes'
+set style line 1 lw 4 lc rgb '#990042' ps 2 pt 6 pi 5
+set style line 2 lw 3 lc rgb '#31f120' ps 2 pt 12 pi 3
+plot [0:25] \
+    'samples/${capture_name}/gslice.txt' using 4:7 with linespoints title 'gslice', \
+    'samples/${capture_name}/gslice-tcmalloc.txt' using 4:7 with linespoints title 'gslice+tcmalloc', \
+    'samples/${capture_name}/malloc.txt' using 4:7 with linespoints title 'malloc (glibc)', \
+    'samples/${capture_name}/malloc-tcmalloc.txt' using 4:7 with linespoints title 'malloc+tcmalloc', \
+    'samples/${capture_name}/gmalloc.txt' using 4:7 with linespoints title 'gmalloc', \
+    'samples/${capture_name}/gmalloc-tcmalloc.txt' using 4:7 with linespoints title 'gmalloc+tcmalloc'
+
+EOF
