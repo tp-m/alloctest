@@ -16,16 +16,17 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <dlfcn.h>
 #include <glib.h>
 #include <glib-object.h>
 #include <malloc.h>
-#include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/wait.h>
+
+#ifdef __linux__
+#include <sys/types.h>
 #include <unistd.h>
+#endif
 
 typedef struct _AllocTest AllocTest;
 typedef void (*AllocTestFunc) (const AllocTest *test);
@@ -36,8 +37,8 @@ struct _AllocTest
    unsigned size;
    unsigned active;
    AllocTestFunc test_func;
-   pthread_mutex_t mutex;
-   pthread_cond_t cond;
+   GMutex mutex;
+   GCond cond;
 };
 
 static void
@@ -124,10 +125,10 @@ worker (void *data)
 {
    AllocTest *test = data;
 
-   pthread_mutex_lock (&test->mutex);
+   g_mutex_lock (&test->mutex);
    test->active++;
-   pthread_cond_wait (&test->cond, &test->mutex);
-   pthread_mutex_unlock (&test->mutex);
+   g_cond_wait (&test->cond, &test->mutex);
+   g_mutex_unlock (&test->mutex);
 
    test->test_func (test);
 
@@ -206,7 +207,7 @@ main (int argc,
    };
    GOptionContext *context;
    GError *error = NULL;
-   pthread_t *threads;
+   GThread **threads;
    int i;
 
    context = g_option_context_new ("- malloc performance tests.");
@@ -249,28 +250,28 @@ main (int argc,
       return EXIT_FAILURE;
    }
 
-   pthread_mutex_init (&test.mutex, NULL);
-   pthread_cond_init (&test.cond, NULL);
+   g_mutex_init (&test.mutex);
+   g_cond_init (&test.cond);
 
-   threads = calloc (nthread, sizeof (pthread_t));
+   threads = calloc (nthread, sizeof (GThread *));
 
    for (i = 0; i < nthread; i++) {
-      pthread_create (&threads [i], NULL, worker, &test);
+      threads[i] = g_thread_new ("alloctest-worker", worker, &test);
    }
 
    for (;;) {
-      pthread_mutex_lock (&test.mutex);
+      g_mutex_lock (&test.mutex);
       if (test.active == nthread) {
          break;
       }
-      pthread_mutex_unlock (&test.mutex);
+      g_mutex_unlock (&test.mutex);
    }
 
    begin = g_get_monotonic_time ();
-   pthread_cond_broadcast (&test.cond);
-   pthread_mutex_unlock (&test.mutex);
+   g_cond_broadcast (&test.cond);
+   g_mutex_unlock (&test.mutex);
    for (i = 0; i < nthread; i++) {
-      pthread_join (threads [i], NULL);
+      g_thread_join (threads [i]);
    }
    end = g_get_monotonic_time ();
 
@@ -286,8 +287,8 @@ main (int argc,
             iter, size, nthread, total_time, minfo.uordblks,
             vmpeak);
 
-   pthread_mutex_destroy (&test.mutex);
-   pthread_cond_destroy (&test.cond);
+   g_mutex_clear (&test.mutex);
+   g_cond_clear (&test.cond);
 
    return EXIT_SUCCESS;
 }
